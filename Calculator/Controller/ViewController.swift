@@ -9,6 +9,7 @@
 //
 
 import UIKit
+import AVFoundation // sound
 
 class ViewController: UIViewController {
     
@@ -22,14 +23,15 @@ class ViewController: UIViewController {
     private var displayValue: String {
         
         get {
-            return displayLabel.text ?? ""
+            var text = displayLabel.text ?? "0"
+            text = (Double(text) == nil) ? "0" : text
+            return text
         }
         
         set {
+            print("setDisplayNumber() value == \(newValue)")
             displayLabel.text = newValue
             defaults.set(newValue, forKey: "displayValue")
-            print("setDisplayNumber() value == \(newValue)")
-            
         }
     }
     
@@ -50,7 +52,6 @@ class ViewController: UIViewController {
         isFinishedTypingNumber = true
         
         calculator.setNumber(displayValue)
-        
         if let calcMethod = sender.currentTitle {
             
             let result = calculator.calculate(symbol: calcMethod)
@@ -63,9 +64,13 @@ class ViewController: UIViewController {
     
     @IBAction func numButtonPressed(_ sender: UIButton) {
         
+        
         if let numValue = sender.currentTitle {
+            // Play sound
+//            AudioServicesPlayAlertSound(SystemSoundID(1322))
             
-            if isFinishedTypingNumber {
+            if isFinishedTypingNumber && numValue != "." {
+                
                 displayValue = numValue
                 
                 isFinishedTypingNumber = false
@@ -73,23 +78,18 @@ class ViewController: UIViewController {
             } else {
                 
                 if numValue == "." {
-                    
-                    guard let number = Double(displayValue) else {
-                        fatalError("Cannot convert display value.")
-                    }
+                    print("displayValue \(displayValue)")
+                   let number = Double(displayValue) ?? 0
                     
                     if floor(number) == number {
-                        displayValue = displayLabel.text! + numValue
+                        displayValue = displayValue + numValue
                     }
                     
                 } else {
                     if displayLabel.text! == "0" {
                         displayValue = numValue
-                        
                     } else {
-                        
                         displayValue = displayLabel.text! + numValue
-                        
                     }
                 }
             }
@@ -97,4 +97,3 @@ class ViewController: UIViewController {
     }
     
 }
-

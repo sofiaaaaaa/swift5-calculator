@@ -14,8 +14,11 @@ struct CalculatorLogic {
     private var isInt: Bool = true
     private var intermediateCalcuation: (n1: Double, calcMethod: String, isInt: Bool)?
     mutating func setNumber(_ value: String) {
-        isInt = value.isInteger
-        self.number = value
+
+        let v = (value == "") ? "0" : value
+        
+        isInt = v.isInteger
+        self.number = v
         
     }
     
@@ -29,31 +32,40 @@ struct CalculatorLogic {
             if symbol == "+/-" {
                 
                 if isInt {
-                    return  String(Int(n) * -1)
+                    let intNumber = Int(n) * -1
+                    return intNumber.delimiter
                 } else {
                     return String(n * -1)
                 }
                 
             } else if symbol == "AC" {
+                
                 self.intermediateCalcuation = nil
                 return "0"
+                
             } else if symbol == "%" {
+                
                 return String(n * 0.01)
+                
             } else if symbol == "=" {
                 if let firstNumberInfo = intermediateCalcuation {
                     if let result = performTwoNumCalculation(n2: n) {
                         if isInt && firstNumberInfo.isInt  {
-                            return  String(Int(result))
+                            let intNumber = Int(result)
+                            return intNumber.delimiter
                         } else {
                             return String(result)
                         }
                     }}
+                
             } else {
                 if let firstNumberInfo = intermediateCalcuation {
                     if let result = performTwoNumCalculation(n2: n) {
                         if isInt && firstNumberInfo.isInt  {
                             intermediateCalcuation = (n1: result, calcMethod: symbol, isInt: isInt)
-                            return String(Int(result))
+                            let intNumber = Int(result)
+                            
+                            return intNumber.delimiter
                         } else {
                             intermediateCalcuation = (n1: result, calcMethod: symbol, isInt: isInt)
                             return String(result)
@@ -63,6 +75,7 @@ struct CalculatorLogic {
                 }
                 
                 intermediateCalcuation = (n1: n, calcMethod: symbol, isInt: isInt)
+                
                 return number
                 
             }
@@ -108,4 +121,30 @@ extension StringProtocol {
     var isInteger: Bool { return Int(self) != nil }
     var isFloat: Bool { return Float(self) != nil }
     var isDouble: Bool { return Double(self) != nil }
+}
+
+
+
+// MARK: - Int Extension
+// Source : https://stackoverflow.com/questions/31021197/how-to-add-commas-to-a-number-in-swift
+//extension Int {
+//    func withCommas() -> String {
+//        let numberFormatter = NumberFormatter()
+//        numberFormatter.numberStyle = .decimal
+//        return numberFormatter.string(from: NSNumber(value:self))!
+//    }
+//}
+
+
+extension Int {
+    private static var numberFormatter: NumberFormatter = {
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .decimal
+
+        return numberFormatter
+    }()
+
+    var delimiter: String {
+        return Int.numberFormatter.string(from: NSNumber(value: self)) ?? ""
+    }
 }
